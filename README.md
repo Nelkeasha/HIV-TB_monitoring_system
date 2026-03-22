@@ -1,10 +1,10 @@
 # HIV & TB Patient Monitoring System — Backend API
 
-A RESTful API built with Node.js, TypeScript, Express, PostgreSQL and Prisma to support community-level HIV and TB patient monitoring in Rwanda. Developed as a final year project at Adventist University of Central Africa (AUCA).
+A RESTful API built with **Node.js**, **TypeScript**, **Express**, **PostgreSQL**, and **Prisma** to support community-level HIV and TB patient monitoring in Rwanda. Developed as a final year project at Adventist University of Central Africa (AUCA).
 
 ---
 
-## Author
+## 📋 Author
 
 - **Name:** IGIHOZO Nelly
 - **ID:** 26740
@@ -15,71 +15,74 @@ A RESTful API built with Node.js, TypeScript, Express, PostgreSQL and Prisma to 
 
 ---
 
-## Project Overview
+## 🎯 Project Overview
 
-Community Health Workers (CHWs) in Rwanda rely heavily on paper-based documentation when monitoring HIV and TB patients at the community level. This system replaces that manual process with a secure, offline-capable digital platform that enables:
+Community Health Workers (CHWs) in Rwanda face significant challenges with paper-based patient documentation. This system modernizes patient monitoring by providing a secure, offline-capable digital platform for:
 
-- Real-time patient registration and history management
-- Medication adherence tracking with automated alerts
-- Home visit documentation and scheduling
-- CHW medication stock management
-- FHIR-based data synchronization with hospital EHR systems
-
----
-
-## Tech Stack
-
-| Layer         | Technology              |
-|---------------|-------------------------|
-| Runtime       | Node.js                 |
-| Language      | TypeScript              |
-| Framework     | Express.js              |
-| Database      | PostgreSQL               |
-| ORM           | Prisma                  |
-| Auth          | JWT (JSON Web Tokens)   |
-| API Docs      | Swagger UI (OpenAPI 3)  |
-| FHIR Server   | HAPI FHIR               |
+- 📝 **Patient Management** — Register, track, and manage HIV/TB patient records
+- 💊 **Medication Adherence** — Monitor treatment adherence with automated low-compliance alerts
+- 🏥 **Home Visit Documentation** — Record and schedule community health worker visits
+- 📦 **Medication Inventory** — Track medication stock levels with expiry alerts
+- 🔄 **EHR Integration** — FHIR-based data synchronization with hospital systems
+- 🔐 **Role-Based Access Control** — Different system levels for CHWs, providers, and administrators
 
 ---
 
-## Project Structure
+## 🛠️ Tech Stack
+
+| Layer         | Technology                    |
+|---------------|-------------------------------|
+| **Runtime**   | Node.js (v18+)                |
+| **Language**  | TypeScript                    |
+| **Framework** | Express.js                    |
+| **Database**  | PostgreSQL                    |
+| **ORM**       | Prisma                        |
+| **Auth**      | JWT (JSON Web Tokens)         |
+| **API Docs**  | Swagger UI (OpenAPI 3)        |
+| **Security**  | Helmet, CORS, Rate Limiting   |
+
+---
+
+## 📁 Project Structure
 ```
 hiv-tb-backend/
 ├── prisma/
-│   └── schema.prisma          # Database models
+│   ├── schema.prisma          # Database models & relationships
+│   └── migrations/            # Database version history
 ├── src/
 │   ├── config/
-│   │   ├── database.ts        # Prisma client
-│   │   ├── env.ts             # Environment variables
-│   │   └── swagger.ts         # Swagger configuration
-│   ├── controllers/
+│   │   ├── database.ts        # Prisma client initialization
+│   │   ├── env.ts             # Environment variable validation
+│   │   └── swagger.ts         # Swagger/OpenAPI documentation
+│   ├── controllers/           # Request handlers for each module
 │   │   ├── auth.controller.ts
 │   │   ├── patient.controller.ts
 │   │   ├── visit.controller.ts
 │   │   ├── adherence.controller.ts
 │   │   └── stock.controller.ts
 │   ├── middleware/
-│   │   ├── auth.middleware.ts  # JWT + role guard
+│   │   ├── auth.middleware.ts # JWT authentication & role validation
 │   │   └── error.middleware.ts
 │   ├── routes/
-│   │   ├── index.ts
+│   │   ├── index.ts           # Route aggregation
 │   │   ├── auth.routes.ts
 │   │   ├── patient.routes.ts
 │   │   ├── visit.routes.ts
 │   │   ├── adherence.routes.ts
 │   │   └── stock.routes.ts
 │   ├── services/
-│   │   └── fhir.service.ts    # FHIR integration
+│   │   └── fhir.service.ts    # FHIR protocol integration
 │   ├── types/
 │   │   ├── index.ts
-│   │   └── express.d.ts
+│   │   └── express.d.ts       # Express request type extensions
 │   ├── utils/
-│   │   ├── jwt.ts
-│   │   ├── logger.ts
-│   │   └── response.ts
-│   ├── app.ts
-│   └── server.ts
-├── .env.example
+│   │   ├── jwt.ts             # Token generation & validation
+│   │   ├── logger.ts          # Application logging
+│   │   └── response.ts        # Standard response formatting
+│   ├── app.ts                 # Express app configuration
+│   └── server.ts              # Server entry point
+├── .env.example               # Environment template
+├── .gitignore
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -87,19 +90,19 @@ hiv-tb-backend/
 
 ---
 
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js v18 or higher
-- PostgreSQL v14 or higher
-- npm v9 or higher
+- **Node.js** v18 or higher ([Download](https://nodejs.org/))
+- **PostgreSQL** v14 or higher ([Download](https://www.postgresql.org/download/))
+- **npm** v9 or higher (included with Node.js)
 
-### Installation
+### Installation Steps
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/your-username/hiv-tb-backend.git
+git clone https://github.com/Nelkeasha/HIV-TB_monitoring_system.git
 cd hiv-tb-backend
 ```
 
@@ -108,95 +111,164 @@ cd hiv-tb-backend
 npm install
 ```
 
-**3. Set up environment variables**
+**3. Configure environment variables**
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and fill in your values:
+Edit `.env` and provide your configuration:
 ```env
+# Server
 PORT=3000
 NODE_ENV=development
+
+# Database
 DATABASE_URL="postgresql://postgres:your_password@localhost:5432/hiv_tb_db"
-JWT_SECRET=your_secret_key_here
+
+# JWT Authentication (JWT_SECRET should be a strong random string)
+JWT_SECRET=your_super_secret_key_change_this_in_production
 JWT_EXPIRES_IN=7d
+
+# External Services (Optional)
 FHIR_SERVER_URL=http://localhost:8080/fhir
 ```
 
-**4. Run database migrations**
+**4. Initialize the database**
 ```bash
 npx prisma migrate dev --name init
 ```
+
+This command will:
+- Create the database schema
+- Run all migrations
+- (Optional) Generate sample data
 
 **5. Start the development server**
 ```bash
 npm run dev
 ```
 
+The server will start at `http://localhost:3000`
+
 ---
 
-## API Documentation
+## 📚 API Documentation
 
-Once the server is running, open your browser at:
+### Interactive Swagger UI
+
+Once the server is running, open your browser and navigate to:
 ```
 http://localhost:3000/api-docs
 ```
 
-You will see the full interactive Swagger UI. Click **Authorize** and paste your JWT token to test protected endpoints.
+You will see the **complete, interactive Swagger UI** with:
+- ✅ Full endpoint documentation with request/response examples
+- ✅ Real-time API testing directly from the browser
+- ✅ Automatic schema validation and error handling
+- ✅ JWT authorization support — Click **Authorize** and paste your token to test protected endpoints
+
+The Swagger documentation reflects all available endpoints across the system:
+- **Authentication** — User registration, login, and profile management
+- **Patients** — Patient registration, updates, and patient history
+- **Home Visits** — Visit documentation and scheduling
+- **Medication Adherence** — Adherence tracking and alerts
+- **Stock Management** — Medication inventory and dispensing
+
+All endpoint details, required parameters, authentication requirements, and response examples are available in the interactive Swagger documentation.
 
 ---
 
-## API Endpoints
+## 🔐 Authentication
 
-### Auth
-| Method | Endpoint               | Description            | Access  |
-|--------|------------------------|------------------------|---------|
-| POST   | /api/v1/auth/register  | Register a new user    | Public  |
-| POST   | /api/v1/auth/login     | Login and get token    | Public  |
-| GET    | /api/v1/auth/profile   | Get current profile    | All     |
+The API uses **JWT (JSON Web Tokens)** for authentication:
 
-### Patients
-| Method | Endpoint               | Description            | Access          |
-|--------|------------------------|------------------------|-----------------|
-| POST   | /api/v1/patients       | Register a patient     | CHW, Admin      |
-| GET    | /api/v1/patients       | List all patients      | All             |
-| GET    | /api/v1/patients/:id   | Get one patient        | All             |
-| PUT    | /api/v1/patients/:id   | Update patient         | CHW, Admin      |
-| DELETE | /api/v1/patients/:id   | Deactivate patient     | Admin           |
+1. **Register** a new user at `/api/v1/auth/register`
+2. **Login** at `/api/v1/auth/login` to receive a JWT token
+3. **Include** the token in the `Authorization` header:
+   ```
+   Authorization: Bearer YOUR_JWT_TOKEN_HERE
+   ```
 
-### Visits
-| Method | Endpoint                          | Description          | Access     |
-|--------|-----------------------------------|----------------------|------------|
-| POST   | /api/v1/visits                    | Record a visit       | CHW        |
-| GET    | /api/v1/visits/patient/:id        | Get patient visits   | All        |
-| GET    | /api/v1/visits/:id                | Get one visit        | All        |
-| PUT    | /api/v1/visits/:id                | Update a visit       | CHW, Admin |
-
-### Adherence
-| Method | Endpoint                          | Description          | Access     |
-|--------|-----------------------------------|----------------------|------------|
-| POST   | /api/v1/adherence                 | Record adherence     | CHW        |
-| GET    | /api/v1/adherence/alerts          | Get low adherence    | All        |
-| GET    | /api/v1/adherence/patient/:id     | Get patient history  | All        |
-
-### Stock
-| Method | Endpoint                          | Description          | Access     |
-|--------|-----------------------------------|----------------------|------------|
-| POST   | /api/v1/stock                     | Add medication       | CHW        |
-| GET    | /api/v1/stock                     | Get my stock         | CHW, Admin |
-| PUT    | /api/v1/stock/:id                 | Update stock         | CHW        |
-| PATCH  | /api/v1/stock/:id/dispense        | Dispense medication  | CHW        |
-| DELETE | /api/v1/stock/:id                 | Delete stock item    | CHW, Admin |
+For API testing in Swagger UI:
+1. Click the **Authorize** button at the top
+2. Paste your JWT token (without the "Bearer " prefix)
+3. Click **Authorize** to apply the token to all requests
+4. Test endpoints normally
 
 ---
 
-## User Roles
+## 👥 User Roles
+
+Different roles have different permissions within the system:
 
 | Role                | Description                                      |
 |---------------------|--------------------------------------------------|
-| chw                 | Community Health Worker — field data entry       |
-| healthcare_provider | Clinician — view patients and reports            |
-| admin               | Full system access and management                |
+| **chw**             | Community Health Worker — field data entry and monitoring |
+| **healthcare_provider** | Clinician — view patients, records, and generate reports |
+| **admin**           | Full system access — manage users, data, and configurations |
+
+---
+
+## 🔄 Available Commands
+
+| Command                              | Description                      |
+|--------------------------------------|----------------------------------|
+| `npm run dev`                        | Start development server (with hot-reload) |
+| `npm run build`                      | Compile TypeScript to JavaScript |
+| `npm start`                          | Start production server          |
+| `npx prisma migrate dev --name <name>` | Create a new database migration |
+| `npx prisma studio`                  | Open visual database browser     |
+| `npx prisma generate`                | Regenerate Prisma client types   |
+
+---
+
+## 📋 Features
+
+- ✅ **Secure Authentication** — JWT-based with role-based access control
+- ✅ **Patient Monitoring** — Comprehensive patient record management
+- ✅ **Medication Tracking** — Adherence monitoring and stock management
+- ✅ **Automated Alerts** — Low adherence and low stock notifications
+- ✅ **API Documentation** — Interactive Swagger UI for all endpoints
+- ✅ **Data Validation** — TypeScript types and Zod/Joi validation
+- ✅ **Security** — Helmet, CORS, rate limiting, and JWT protection
+- ✅ **FHIR Compatibility** — Standardized health data exchange
+- ✅ **Offline Support** — Designed for offline work with sync capabilities
+
+---
+
+## 🐛 Troubleshooting
+
+**Database Connection Error?**
+- Verify PostgreSQL is running
+- Check `DATABASE_URL` in `.env` matches your setup
+- Create the database manually if needed
+
+**Port Already in Use?**
+- Change `PORT` in `.env` to an available port
+- Or kill the process using the current port
+
+**Prisma Client Error?**
+```bash
+npx prisma generate
+```
+
+**Dependencies Issue?**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+---
+
+## 📜 License
+
+This project was developed for academic purposes at **Adventist University of Central Africa (AUCA)**, February 2026.
+
+---
+
+## 📞 Support & Questions
+
+For issues, questions, or contributions, please open an issue on the GitHub repository or contact the author at **igihozonelly3@gmail.com**
 
 ---
 
