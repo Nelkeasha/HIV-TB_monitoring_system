@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role
+  facilityId   String?  @map("facility_id")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  patients         Patient[]
+  visits           Visit[]
+  adherenceRecords AdherenceRecord[]
+  medicationStock  MedicationStock[]
+
+  @@map("users")
+}
+
+model Patient {
+  id                     String      @id @default(uuid())
+  nationalId             String?     @unique @map("national_id")
+  firstName              String      @map("first_name")
+  lastName               String      @map("last_name")
+  dateOfBirth            DateTime    @map("date_of_birth")
+  gender                 Gender
+  phone                  String?
+  address                String
+  diseaseType            DiseaseType @map("disease_type")
+  artStartDate           DateTime?   @map("art_start_date")
+  tbTreatmentStartDate   DateTime?   @map("tb_treatment_start_date")
+  assignedChwId          String      @map("assigned_chw_id")
+  facilityId             String?     @map("facility_id")
+  fhirId                 String?     @map("fhir_id")
+  isActive               Boolean     @default(true) @map("is_active")
+  createdAt              DateTime    @default(now()) @map("created_at")
+  updatedAt              DateTime    @updatedAt @map("updated_at")
+
+  assignedChw      User              @relation(fields: [assignedChwId], references: [id])
+  visits           Visit[]
+  adherenceRecords AdherenceRecord[]
+
+  @@map("patients")
+}
+
+model Visit {
+  id            String    @id @default(uuid())
+  patientId     String    @map("patient_id")
+  chwId         String    @map("chw_id")
+  visitDate     DateTime  @map("visit_date")
+  visitType     VisitType @map("visit_type")
+  notes         String?
+  symptoms      String[]
+  sideEffects   String[]  @map("side_effects")
+  missedDoses   Int       @default(0) @map("missed_doses")
+  nextVisitDate DateTime? @map("next_visit_date")
+  synced        Boolean   @default(false)
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  chw     User    @relation(fields: [chwId], references: [id])
+
+  @@map("visits")
+}
+
+model AdherenceRecord {
+  id                  String   @id @default(uuid())
+  patientId           String   @map("patient_id")
+  chwId               String   @map("chw_id")
+  recordDate          DateTime @map("record_date")
+  dosesTaken          Int      @map("doses_taken")
+  dosesPrescribed     Int      @map("doses_prescribed")
+  adherencePercentage Int      @map("adherence_percentage")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  chw     User    @relation(fields: [chwId], references: [id])
+
+  @@map("adherence_records")
+}
+
+model MedicationStock {
+  id                String    @id @default(uuid())
+  chwId             String    @map("chw_id")
+  medicationName    String    @map("medication_name")
+  quantity          Int       @default(0)
+  unit              String
+  lowStockThreshold Int       @default(10) @map("low_stock_threshold")
+  expiryDate        DateTime? @map("expiry_date")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  chw User @relation(fields: [chwId], references: [id])
+
+  @@unique([chwId, medicationName])
+  @@map("medication_stock")
+}
+
+enum Role {
+  chw
+  healthcare_provider
+  admin
+}
+
+enum Gender {
+  male
+  female
+  other
+}
+
+enum DiseaseType {
+  HIV
+  TB
+  HIV_TB
+}
+
+enum VisitType {
+  home_visit
+  facility_visit
+  phone_call
+}
