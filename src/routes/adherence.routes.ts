@@ -1,10 +1,12 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   recordAdherence,
   getPatientAdherence,
   getAllAdherenceAlerts,
-} from '../controllers/adherence.controller';
-import { authenticate, authorize } from '../middleware/auth.middleware';
+} from "../controllers/adherence.controller";
+import { authenticate, authorize } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate.middleware";
+import { recordAdherenceSchema } from "../validators/adherence.validator";
 
 const router = Router();
 
@@ -13,6 +15,13 @@ const router = Router();
  * tags:
  *   name: Adherence
  *   description: Medication adherence tracking
+router.post(
+  '/',
+  authenticate,
+  authorize('chw'),
+  validate(recordAdherenceSchema),
+  recordAdherence,
+);
  */
 
 /**
@@ -25,6 +34,7 @@ const router = Router();
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
+router.get('/alerts', authenticate, getAllAdherenceAlerts);
  *       content:
  *         application/json:
  *           schema:
@@ -52,7 +62,7 @@ const router = Router();
  *       404:
  *         description: Patient not found
  */
-router.post('/', authenticate, authorize('chw'), recordAdherence);
+router.get("/patient/:patient_id", authenticate, getPatientAdherence);
 
 /**
  * @swagger
@@ -66,7 +76,7 @@ router.post('/', authenticate, authorize('chw'), recordAdherence);
  *       200:
  *         description: List of adherence alerts
  */
-router.get('/alerts', authenticate, getAllAdherenceAlerts);
+router.get("/alerts", authenticate, getAllAdherenceAlerts);
 
 /**
  * @swagger
@@ -95,6 +105,13 @@ router.get('/alerts', authenticate, getAllAdherenceAlerts);
  *       404:
  *         description: Patient not found
  */
-router.get('/patient/:patient_id', authenticate, getPatientAdherence);
+router.get("/patient/:patient_id", authenticate, getPatientAdherence);
+router.post(
+  "/",
+  authenticate,
+  authorize("chw"),
+  validate(recordAdherenceSchema),
+  recordAdherence,
+);
 
 export default router;

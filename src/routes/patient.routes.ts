@@ -1,12 +1,17 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createPatient,
   getPatients,
   getPatientById,
   updatePatient,
   deletePatient,
-} from '../controllers/patient.controller';
-import { authenticate, authorize } from '../middleware/auth.middleware';
+} from "../controllers/patient.controller";
+import { authenticate, authorize } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate.middleware";
+import {
+  createPatientSchema,
+  updatePatientSchema,
+} from "../validators/patient.validator";
 
 const router = Router();
 
@@ -37,7 +42,13 @@ const router = Router();
  *       409:
  *         description: Patient already exists
  */
-router.post('/', authenticate, authorize('chw', 'admin'), createPatient);
+router.post(
+  "/",
+  authenticate,
+  authorize("chw", "admin"),
+  validate(createPatientSchema),
+  createPatient,
+);
 
 /**
  * @swagger
@@ -63,7 +74,7 @@ router.post('/', authenticate, authorize('chw', 'admin'), createPatient);
  *       200:
  *         description: List of patients
  */
-router.get('/', authenticate, getPatients);
+router.get("/", authenticate, getPatients);
 
 /**
  * @swagger
@@ -86,7 +97,7 @@ router.get('/', authenticate, getPatients);
  *       404:
  *         description: Patient not found
  */
-router.get('/:id', authenticate, getPatientById);
+router.get("/:id", authenticate, getPatientById);
 
 /**
  * @swagger
@@ -123,7 +134,13 @@ router.get('/:id', authenticate, getPatientById);
  *       200:
  *         description: Patient updated
  */
-router.put('/:id', authenticate, authorize('chw', 'admin'), updatePatient);
+router.put(
+  "/:id",
+  authenticate,
+  authorize("chw", "admin"),
+  validate(updatePatientSchema),
+  updatePatient,
+);
 
 /**
  * @swagger
@@ -144,6 +161,6 @@ router.put('/:id', authenticate, authorize('chw', 'admin'), updatePatient);
  *       200:
  *         description: Patient deactivated
  */
-router.delete('/:id', authenticate, authorize('admin'), deletePatient);
+router.delete("/:id", authenticate, authorize("admin"), deletePatient);
 
 export default router;

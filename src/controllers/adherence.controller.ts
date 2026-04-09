@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/database';
+import { createFhirAdherenceObservation } from '../services/fhir.service';
 
 export const recordAdherence = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -42,6 +43,25 @@ export const recordAdherence = async (req: Request, res: Response): Promise<void
         chw:     { select: { id: true, name: true } },
       },
     });
+
+    try {
+      const fhirPatient = await prisma.patient.findUnique({
+        where: { id: patient_id },
+        select: { fhirId: true },
+      });
+
+      if (fhirPatient?.fhirId) {
+        await createFhirAdherenceObservation({
+          fhirPatientId: fhirPatient.fhirId,
+          adherencePercentage: adherencePercentage,
+          recordDate: new Date(record_date),
+          dosesTaken: doses_taken,
+          dosesPrescribed: doses_prescribed,
+        });
+      }
+    } catch (fhirError) {
+      console.warn("FHIR adherence sync failed:", fhirError);
+    }
 
     // Build alert if adherence is below 95%
     const alert = adherencePercentage < 95

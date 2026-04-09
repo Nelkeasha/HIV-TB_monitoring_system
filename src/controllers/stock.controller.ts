@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/database';
+import { createFhirMedicationDispense } from '../services/fhir.service';
 
 export const addStock = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -127,6 +128,10 @@ export const updateStock = async (req: Request, res: Response): Promise<void> =>
       },
     });
 
+    
+
+  
+
     const isLow = stock.quantity <= stock.lowStockThreshold;
 
     res.json({
@@ -178,6 +183,31 @@ export const dispenseStock = async (req: Request, res: Response): Promise<void> 
       where: { id: id as string },
       data:  { quantity: newQuantity },
     });
+
+    try {
+      const chw = await prisma.user.findUnique({
+        where: { id: chwId },
+        select: { name: true },
+      });
+
+      // Get any patient linked to this CHW to reference in FHIR
+      const patient = await prisma.patient.findFirst({
+        where: { assignedChwId: chwId, isActive: true },
+        select: { fhirId: true },
+      });
+
+      if (patient?.fhirId) {
+        await createFhirMedicationDispense({
+          fhirPatientId: patient.fhirId,
+          medicationName: existing.medicationName,
+          quantity: quantity_given,
+          unit: existing.unit,
+          dispensedBy: chw?.name || "CHW",
+        });
+      }
+    } catch (fhirError) {
+      console.warn("FHIR dispense sync failed:", fhirError);
+    }
 
     const isLow = stock.quantity <= stock.lowStockThreshold;
 

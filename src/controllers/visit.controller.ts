@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/database';
+import { createFhirTask } from '../services/fhir.service';
 
 const firstParam = (value: string | string[] | undefined): string | undefined => {
   if (Array.isArray(value)) return value[0];
@@ -49,6 +50,20 @@ export const createVisit = async (req: Request, res: Response): Promise<void> =>
         },
       },
     });
+
+    try {
+      if (patient.fhirId) {
+        await createFhirTask({
+          fhirPatientId: patient.fhirId,
+          chwName: visit.chw.name,
+          visitDate: new Date(visit_date),
+          visitType: visit.visitType,
+          notes: visit.notes ?? undefined,
+        });
+      }
+    } catch (fhirError) {
+      console.warn('FHIR visit sync failed:', fhirError);
+    }
 
     res.status(201).json({ success: true, message: 'Visit recorded', data: visit });
   } catch (error) {

@@ -1,11 +1,13 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   createVisit,
   getPatientVisits,
   getVisitById,
   updateVisit,
-} from '../controllers/visit.controller';
-import { authenticate, authorize } from '../middleware/auth.middleware';
+} from "../controllers/visit.controller";
+import { authenticate, authorize } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate.middleware";
+import { createVisitSchema } from "../validators/visit.validator";
 
 const router = Router();
 
@@ -26,6 +28,13 @@ const router = Router();
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
+router.post(
+  '/',
+  authenticate,
+  authorize('chw'),
+  validate(createVisitSchema),
+  createVisit,
+);
  *       content:
  *         application/json:
  *           schema:
@@ -47,6 +56,7 @@ const router = Router();
  *                 example: "Patient is responding well to treatment"
  *               symptoms:
  *                 type: array
+router.get('/patient/:patient_id', authenticate, getPatientVisits);
  *                 items:
  *                   type: string
  *                 example: ["fever", "cough"]
@@ -68,7 +78,7 @@ const router = Router();
  *       404:
  *         description: Patient not found
  */
-router.post('/', authenticate, authorize('chw'), createVisit);
+router.get("/:id", authenticate, getVisitById);
 
 /**
  * @swagger
@@ -91,7 +101,7 @@ router.post('/', authenticate, authorize('chw'), createVisit);
  *       404:
  *         description: Patient not found
  */
-router.get('/patient/:patient_id', authenticate, getPatientVisits);
+router.get("/patient/:patient_id", authenticate, getPatientVisits);
 
 /**
  * @swagger
@@ -109,12 +119,13 @@ router.get('/patient/:patient_id', authenticate, getPatientVisits);
  *           type: string
  *           format: uuid
  *     responses:
+router.put('/:id', authenticate, authorize('chw', 'admin'), updateVisit);
  *       200:
  *         description: Visit details
  *       404:
  *         description: Visit not found
  */
-router.get('/:id', authenticate, getVisitById);
+router.get("/:id", authenticate, getVisitById);
 
 /**
  * @swagger
@@ -156,6 +167,13 @@ router.get('/:id', authenticate, getVisitById);
  *       200:
  *         description: Visit updated
  */
-router.put('/:id', authenticate, authorize('chw', 'admin'), updateVisit);
+router.post(
+  "/",
+  authenticate,
+  authorize("chw"),
+  validate(createVisitSchema),
+  createVisit,
+);
+router.put("/:id", authenticate, authorize("chw", "admin"), updateVisit);
 
 export default router;

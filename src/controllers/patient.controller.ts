@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/database';
+import { createFhirPatient, createFhirCondition } from '../services/fhir.service';
 
 export const createPatient = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -43,6 +44,37 @@ export const createPatient = async (req: Request, res: Response): Promise<void> 
         facilityId,
       },
     });
+
+    try {
+      const fhirId = await createFhirPatient({
+        id: patient.id,
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        dateOfBirth: patient.dateOfBirth,
+        gender: patient.gender,
+        phone: patient.phone ?? undefined,
+        nationalId: patient.nationalId ?? undefined,
+      });
+
+      // Save FHIR ID back to your DB
+      await prisma.patient.update({
+        where: { id: patient.id },
+        data: { fhirId },
+      });
+
+      // Also create Condition resource for the disease
+      await createFhirCondition({
+        fhirPatientId: fhirId,
+        diseaseType: patient.diseaseType,
+        onsetDate: patient.artStartDate ?? undefined,
+      });
+    } catch (fhirError: any) {
+  console.error('❌ FHIR sync error:', {
+    message: fhirError?.message,
+    cause:   fhirError?.cause,
+    stack:   fhirError?.stack,
+  });
+    }
 
     res.status(201).json({ success: true, message: 'Patient registered', data: patient });
   } catch (error) {

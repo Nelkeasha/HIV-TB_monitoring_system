@@ -1,6 +1,8 @@
-import { Router } from 'express';
-import { register, login, getProfile } from '../controllers/auth.controller';
-import { authenticate } from '../middleware/auth.middleware';
+import { Router } from "express";
+import { register, login, getProfile } from "../controllers/auth.controller";
+import { authenticate } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate.middleware";
+import { registerSchema, loginSchema } from "../validators/auth.validator";
 
 const router = Router();
 
@@ -17,6 +19,7 @@ const router = Router();
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
+router.post('/register', validate(registerSchema), register);
  *     security: []
  *     requestBody:
  *       required: true
@@ -38,9 +41,9 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/register', register);
 
 /**
+router.post('/login', validate(loginSchema), login);
  * @swagger
  * /auth/login:
  *   post:
@@ -55,6 +58,7 @@ router.post('/register', register);
  *             $ref: '#/components/schemas/LoginInput'
  *     responses:
  *       200:
+router.get('/profile', authenticate, getProfile);
  *         description: Login successful
  *         content:
  *           application/json:
@@ -63,7 +67,6 @@ router.post('/register', register);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', login);
 
 /**
  * @swagger
@@ -79,6 +82,8 @@ router.post('/login', login);
  *       401:
  *         description: Unauthorized
  */
-router.get('/profile', authenticate, getProfile);
+router.get("/profile", authenticate, getProfile);
+router.post("/register", validate(registerSchema), register);
+router.post("/login", validate(loginSchema), login);
 
 export default router;

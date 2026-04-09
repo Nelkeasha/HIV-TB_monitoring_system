@@ -1,18 +1,30 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   addStock,
   getMyStock,
   updateStock,
   dispenseStock,
   deleteStock,
-} from '../controllers/stock.controller';
-import { authenticate, authorize } from '../middleware/auth.middleware';
+} from "../controllers/stock.controller";
+import { authenticate, authorize } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate.middleware";
+import {
+  addStockSchema,
+  dispenseStockSchema,
+} from "../validators/stock.validator";
 
 const router = Router();
 
 /**
  * @swagger
  * tags:
+router.post(
+  '/',
+  authenticate,
+  authorize('chw'),
+  validate(addStockSchema),
+  addStock,
+);
  *   name: Stock
  *   description: CHW medication stock management
  */
@@ -25,6 +37,7 @@ const router = Router();
  *     tags: [Stock]
  *     security:
  *       - bearerAuth: []
+router.get('/', authenticate, authorize('chw', 'admin'), getMyStock);
  *     requestBody:
  *       required: true
  *       content:
@@ -55,13 +68,13 @@ const router = Router();
  *       409:
  *         description: Medication already exists
  */
-router.post('/', authenticate, authorize('chw'), addStock);
 
 /**
  * @swagger
  * /stock:
  *   get:
  *     summary: Get all stock for logged in CHW with alerts
+router.put('/:id', authenticate, authorize('chw'), updateStock);
  *     tags: [Stock]
  *     security:
  *       - bearerAuth: []
@@ -69,7 +82,7 @@ router.post('/', authenticate, authorize('chw'), addStock);
  *       200:
  *         description: Stock list with low stock and expiry alerts
  */
-router.get('/', authenticate, authorize('chw', 'admin'), getMyStock);
+router.get("/", authenticate, authorize("chw", "admin"), getMyStock);
 
 /**
  * @swagger
@@ -94,6 +107,13 @@ router.get('/', authenticate, authorize('chw', 'admin'), getMyStock);
  *             properties:
  *               quantity:
  *                 type: integer
+router.patch(
+  '/:id/dispense',
+  authenticate,
+  authorize('chw'),
+  validate(dispenseStockSchema),
+  dispenseStock,
+);
  *                 example: 150
  *               low_stock_threshold:
  *                 type: integer
@@ -107,7 +127,7 @@ router.get('/', authenticate, authorize('chw', 'admin'), getMyStock);
  *       404:
  *         description: Stock item not found
  */
-router.put('/:id', authenticate, authorize('chw'), updateStock);
+router.put("/:id", authenticate, authorize("chw"), updateStock);
 
 /**
  * @swagger
@@ -115,6 +135,7 @@ router.put('/:id', authenticate, authorize('chw'), updateStock);
  *   patch:
  *     summary: Dispense medication and reduce stock
  *     tags: [Stock]
+router.delete('/:id', authenticate, authorize('chw', 'admin'), deleteStock);
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -141,7 +162,6 @@ router.put('/:id', authenticate, authorize('chw'), updateStock);
  *       400:
  *         description: Not enough stock available
  */
-router.patch('/:id/dispense', authenticate, authorize('chw'), dispenseStock);
 
 /**
  * @swagger
@@ -164,6 +184,20 @@ router.patch('/:id/dispense', authenticate, authorize('chw'), dispenseStock);
  *       404:
  *         description: Stock item not found
  */
-router.delete('/:id', authenticate, authorize('chw', 'admin'), deleteStock);
+router.post(
+  "/",
+  authenticate,
+  authorize("chw"),
+  validate(addStockSchema),
+  addStock,
+);
+router.patch(
+  "/:id/dispense",
+  authenticate,
+  authorize("chw"),
+  validate(dispenseStockSchema),
+  dispenseStock,
+);
+router.delete("/:id", authenticate, authorize("chw", "admin"), deleteStock);
 
 export default router;

@@ -17,4 +17,8 @@ export const config = {
         secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     },
+
+    fhir: {
+        serverUrl: process.env.FHIR_SERVER_URL || 'http://localhost:8080/fhir',
+    },
 };
